@@ -1,0 +1,10 @@
+# ignore data and output
+/data
+
+/dump
+/output
+/tem
+
+/libsvm
+/__pycache__
+/.vscode
