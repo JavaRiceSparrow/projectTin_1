@@ -167,11 +167,12 @@ for theChar in range(1,10):
     if DEF_DEBUG_OPT:
         print("[tn.py]Getting endnode of char {:d}...".format(theChar))
 
-    tempPointsList, data = getEndNode(template)
-    tempPoints = np.array(tempPointsList)
+    tempPointsList, data = getEndNode(template,output=True)
+    tempPoints = np.array(tempPointsList).reshape([-1,2])
+
 
     for img in imgArr:
-        print(imgCount)
+        # print(imgCount)
 
         if DEF_DEBUG_OPT:
             print("[tn.py]Getting endnode of img {:d}...".format(imgCount))
@@ -180,12 +181,16 @@ for theChar in range(1,10):
         outputList.append(data)
         pointArr = np.array(points)
         tem_pArr = np.array([pointArr,]*len(tempPoints))
+        # print(tempPoints.shape)
         if DEF_DEBUG_OPT:
             print("[tn.py]Finding response node of img {:d}...".format(imgCount))
+        
         if tempPoints.size != 0:
             tem_pArr = np.transpose(tem_pArr,(1,0,2))
             tem_tArr = np.array([tempPoints,]*len(pointArr))
+            # print(tempPoints.shape)
             # points_len*temp_len*2
+            # print(tem_tArr.shape)
             d = np.sum((tem_tArr-tem_pArr)**2, axis = 2)
             corresList = []
             while d.size != 0:
@@ -220,17 +225,28 @@ for theChar in range(1,10):
         # saveImg(data3,path)
         imgCount += 1
 
-    print(template.shape)
+    # print(template.shape)
 
     # for op in outputList:
+
+
+    # ^  <------------->
+    # |  <------------->
+    # t  <------------->
+    # |  <------------->
+    # V  <------------->
+    
     alldatas = []
-    tp_x, tp_y = template.shape(0), template.shape(1)
-    alldatas.append(np.concatenate(tuple(template,np.zeros(tp_x, 5*189-tp_y)), axis = 0))
+    tem_color = arrToImg(template)
+    tp_x, tp_y, tp_z = tem_color.shape
+    
+    alldatas.append(np.concatenate((tem_color,np.zeros((5*189-tp_x, tp_y, tp_z))), axis = 0))
     for i in range(10):
         j = 5
         alldatas.append(np.concatenate(tuple(outputList[i*j: (i+1)*j]), axis = 0))
 
     alldata = np.concatenate(tuple(alldatas), axis = 1)
+    # alldata = np.concatenate((arr1,alldata0), axis = 0)
     pathList = ["tem/","node/","result",str(theChar), \
     "_","total",".bmp" ]
     path = "".join(pathList)
