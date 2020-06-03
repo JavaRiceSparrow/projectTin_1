@@ -225,7 +225,7 @@ for theChar in range(1,10):
         # saveImg(data3,path)
         imgCount += 1
 
-    # print(template.shape)
+    # print(template.shape
 
     # for op in outputList:
 
