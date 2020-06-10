@@ -4,7 +4,10 @@ from utils import *
 from imglib import *
 
 
-def findEndNode(Contour,d = 10,threhold = 0.5):
+def findEndNode(Contour, d = 10, max_range = 6, threhold_theta = 60):
+
+    cos_theta = np.cos(threhold_theta)
+    threhold = np.abs(cos_theta)*cos_theta
 
     cSize = len(Contour)
     npCtr = np.array(Contour)
@@ -69,7 +72,7 @@ def findEndNode(Contour,d = 10,threhold = 0.5):
 
         return np.equal(data, array)
 
-    localMax = getLocalMax(cos_square ,-d,d)
+    localMax = getLocalMax(cos_square ,- max_range, max_range)
     
     return np.logical_and((cos_square >= threhold), localMax)
 

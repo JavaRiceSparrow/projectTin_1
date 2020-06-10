@@ -128,8 +128,8 @@ def loadAllImg(charRange, wordRange, returnType = 2, Blight = False):
     else :
         return data, test
 
-def loadTemplate(charIdx, Blight = False):
-    str1 = 'data/template/tem1/'
+def loadTemplate(charIdx, temIdx = 1, Blight = False):
+    str1 = 'data/template/tem' + str(temIdx) + '/'
     str3 = '.bmp'
     # data = np.empty([charRange[1], ImgSizeX, ImgSizeY], dtype = int)
 
