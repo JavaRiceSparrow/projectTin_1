@@ -2,11 +2,38 @@ import numpy as np
 
 from utils import *
 from imglib import *
+from contour import getAllContour
 
+
+def getEndNode(img, output = False, d = 10, max_range = 6, threhold_theta = 60):
+    msg = []
+    contours = getAllContour(img, errorMsg = msg)
+
+    data1 = np.expand_dims(img, axis = 2)
+    data = 255*np.concatenate([data1, data1, data1], axis=2).astype('uint8')
+
+    data0= data.copy()
+  
+    nodes = []
+    data3= data.copy()
+    for contour in contours:
+        nodeBol = findEndNode(contour,d, max_range, threhold_theta)
+        ctr = np.array(contour)
+        for i in ctr[nodeBol]:
+            nodes.append(i)
+
+    for node in nodes:
+        x,y = node
+        data3[x,y] = np.array([250,0,0])# np.array([150,150,150])
+   
+    if output :
+        return nodes, data3
+    else:
+        return nodes
 
 def findEndNode(Contour, d = 10, max_range = 6, threhold_theta = 60):
 
-    cos_theta = np.cos(threhold_theta)
+    cos_theta = np.cos(threhold_theta*np.pi/180)
     threhold = np.abs(cos_theta)*cos_theta
 
     cSize = len(Contour)
