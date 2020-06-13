@@ -1,8 +1,14 @@
 import numpy as np
 
-a = np.array([1,2,3])
+a = np.array([[1,4],]*7)
 print(a.shape)
-print(a.shape == (3,))
+print(a+1.5)
+# a.astype()
+b = np.zeros(a.shape)
+# b = np.empty_like
+print(b-1.2)
+# print(np.argmax(a))
+
 
 
 

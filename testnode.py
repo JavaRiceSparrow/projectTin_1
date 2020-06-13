@@ -18,40 +18,103 @@ def readTemplate(ft):
     for i in range(5):
         while str[fro] != '(':
             fro += 1
+            if fro==str_end:
+                return nodes
         mid = fro
         while str[mid] != ',':
             mid += 1
         end = mid
         while str[end] != ')':
             end += 1
+        
 
         x = int(str[fro+1:mid])
         y = int(str[mid+1:end])
         nodes.append([x,y])
-        if (end = str-1):
+        if (end == str_end-1):
             break
+        fro = end
     return nodes
 
-# def nodeNorm(nodes, data):
-#     if len(data.shape) == 2:
-#         x,y = data.shape
-#     else:
-#         x,y,_ = data.shape
+def nodeNorm(nodes, data):
+    nodeArr = np.array(nodes)
+    normNodes = np.zeros(nodeArr.shape)
+    # nodes.astype(np.float64)
+    if len(data.shape) == 2:
+        x,y = data.shape
+    else:
+        # x,y,_ = data.shape
+        print("Fuck")
 
-    
-    
+    ax = np.sum(data,axis=1)!=0
+    ay = np.sum(data,axis=0)!=0
+    # print(ax)
+    # print(ay)
+    alx = (np.array(range(len(ax)))+1)*ax
+    aly = (np.array(range(len(ay)))+1)*ay
+    x_max = np.max(alx)-1
+    alx[alx==0] = 1000
+    x_min = np.min(alx)-1
+    y_max = np.max(aly)-1
+    aly[aly==0] = 1000
+    y_min = np.min(aly)-1
+    # print(x_max)
+    # print(x_min)
+    # print(y_max)
+    # print(y_min)
+    size = max(x_max-x_min, y_max-y_min)
 
+    # S = np.max(x_max-x_min, y_max-y_min)
+    # print(type(nodes[:,0]))
+    # print(type((x_max+x_min)/2.0))
+
+    normNodes[:,0] = nodeArr[:,0] -(x_max+x_min)/2.0
+    normNodes[:,1] = nodeArr[:,1] -(y_max+y_min)/2.0
+    normNodes[:,0] = nodeArr[:,0] *100/size
+    normNodes[:,1] = nodeArr[:,1] *100/size
+    return normNodes
+
+def getResponseList(nodes, img, tem):
+    node_norm = nodeNorm(nodes, img)
+    ans = []
+
+    # pointArr = np.array(points)
+    tem_pArr = np.array([node_norm,]*len(tem))
+    # print(tempPoints.shape)
+    if DEF_DEBUG_OPT:
+        print("[tn.py]Finding response node of img {:d}...".format(imgCount))
+    
+    if tempPoints.size != 0:
+        tem_pArr = np.transpose(tem_pArr,(1,0,2))
+        tem_tArr = np.array([tem,]*len(node_norm))
+        # print(tempPoints.shape)
+        # points_len*temp_len*2
+        # print(tem_tArr.shape)
+        d = np.sum((tem_tArr-tem_pArr)**2, axis = 2)
+        corresList = []
+        while d.size != 0:
+            result = np.array(np.where(d == np.amin(d))).T
+            # if result.shape[0] == 1:
+            pos = result[0]
+            ans.append((nodes[pos[0]]))
+            d = np.delete(d, pos[0],0)
+            d = np.delete(d, pos[1],1)
+    # for node in tem:
+    #     dist = node_norm-node
+    #     dist = np.sum(np.abs(dist),axis = 1)
+    #     # dist2 = dist**2
+    #     # dist = np.sum(dist2, axis = 1)
+    #     idx = np.argmin(dist)
+    #     ans.append(nodes[idx])
+    return ans
 
 
 DEF_DEBUG_OPT = True
 DEF_DEBUG_OPT = False
 
-
 # fp = open("tem/temNodes.txt", "w")
 # import color
 ft = open("template.txt")
-
-
 
 # for theChar in range(1,10):
 for theChar in range(1,13):
@@ -60,7 +123,7 @@ for theChar in range(1,13):
     if DEF_DEBUG_OPT:
         print("[tn.py]Starting char {:d}...".format(theChar))
 
-    imgArr = loadAllImg((theChar,1), (1,50), returnType= 0)[0]
+    
     imgCount = 0
     outputList = []
     template = loadTemplate(theChar, temIdx=1)
@@ -69,34 +132,36 @@ for theChar in range(1,13):
         print("[tn.py]Getting endnode of char {:d}...".format(theChar))
 
     # tempPointsList,getEndNode(template, threhold_theta=90)
-    temNodeList = readTemplate(ft)
+    tempNodeList = readTemplate(ft)
 
     # tempPoints = np.array(tempPointsList).reshape([-1,2])
     tempPoints = np.array(tempNodeList).reshape([-1,2])
+    # for point in tempPoints:
+    #     print(point, end = ' ')
+    # print()
     tem_color = arrToImg(template)
     colorIdx = 0
-    # fp.write("Template {:d}: \n".format(theChar))
-    # for point in tempPointsList:
+    
     for point in tempPoints:
         (x,y) = point
-        # tcolor = np.array([250,0,0])
-        # tem_color[x,y] = tcolor
         tcolor = np.array(color.getHue(60*(colorIdx%5)))
         tem_color[x,y-1:y+2] = tcolor
         tem_color[x-1:x+2,y] = tcolor
         colorIdx += 1
         tem_color[colorIdx*5:(colorIdx+1)*5,0:2] = tcolor
 
-        # fp.write("({:d},{:d}) ".format(point[0], point[1]))
-    #     if (colorIdx%5)==0:
-    #         fp.write("\n")
-    # fp.write("\n")
+    normTemp = nodeNorm(tempPoints, template)
+    # for point in normTemp:
+    #     print(point, end = ' ')
+    # print()
 
-    pathList = ["tem/","template/","testO_",str(theChar),".bmp" ]
-    path = "".join(pathList)
-    saveImg(tem_color, path)
 
-    '''
+    # pathList = ["tem/","template/","testO_",str(theChar),".bmp" ]
+    # path = "".join(pathList)
+    # saveImg(tem_color, path)
+
+    # '''
+    imgArr = loadAllImg((theChar,1), (1,50), returnType= 0)[0]
     for img in imgArr:
         # print(imgCount)
 
@@ -105,6 +170,27 @@ for theChar in range(1,13):
 
         points, data = getEndNode(img,output=True)
         outputList.append(data)
+        normPoint = getResponseList(points, img, normTemp)
+        # print(len(normPoint))
+        if (len(normTemp) != len(normPoint)):
+            print (len(normTemp))
+        colorIdx = 0
+        for point in normPoint:
+            (x,y) = point
+            x = int(x)
+            y = int(y)
+            # data3[x-1,y] = color_red
+            # data3[x+1,y] = color_red
+            # data3[x,y-1] = color_red
+            # data3[x,y+1] = color_red
+
+            # import color
+            tcolor = np.array(color.getHue(60*(colorIdx%5)))
+            # tcolor = np.array(color.getHue(50*colorIdx))
+            data[x,y-1:y+2] = tcolor
+            data[x-1:x+2,y] = tcolor
+            colorIdx += 1
+
 
         # pointArr = np.array(points)
         # tem_pArr = np.array([pointArr,]*len(tempPoints))
@@ -178,8 +264,7 @@ for theChar in range(1,13):
 
     alldata = np.concatenate(tuple(alldatas), axis = 1)
     # alldata = np.concatenate((arr1,alldata0), axis = 0)
-    pathList = ["tem/","eNodeT1/","testRangeT2_",str(theChar), \
-    "_","45",".bmp" ]
+    pathList = ["tem/","nodeTest/","test1_",str(theChar), ".bmp" ]
     path = "".join(pathList)
     saveImg(alldata, path)
     # '''

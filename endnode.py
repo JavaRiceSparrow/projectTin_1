@@ -24,7 +24,7 @@ def getEndNode(img, output = False, d = 10, max_range = 6, threhold_theta = 60):
 
     for node in nodes:
         x,y = node
-        data3[x,y] = np.array([250,0,0])# np.array([150,150,150])
+        data3[x,y] = np.array([120,120,120])# np.array([150,150,150])
    
     if output :
         return nodes, data3
